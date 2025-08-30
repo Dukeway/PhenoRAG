@@ -1,3 +1,5 @@
+# environment.yml (Corrected)
+
 name: phenorag-env
 channels:
   - pytorch
@@ -8,9 +10,8 @@ dependencies:
   - streamlit=1.34.1
   - pandas=2.2.2
   - numpy=1.26.4
-  - openai=1.30.1
+  - openai=1.30.1  # <--- 新增/修正这一行
   - python-dotenv=1.0.1
-  # Conda can handle PyTorch and FAISS installation robustly
   - pytorch::pytorch
   - pytorch::torchvision
   - pytorch::torchaudio
