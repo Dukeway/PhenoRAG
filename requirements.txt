@@ -1,0 +1,8 @@
+streamlit
+python-dotenv
+openai
+fastembed
+faiss-cpu
+numpy
+pandas
+sentence-transformers
