@@ -54,9 +54,13 @@ def build_knowledge_base(_hpo_data):
     model_name = "BAAI/bge-small-en-v1.5"
     embedding_model = SentenceTransformer(model_name)  # Automatically downloads and caches
 
-    hpo_data_list = _hpo_data[0]  # The list of terms
+    # --- 这是需要修改的地方 ---
+    # 从传入的元组中，只获取我们需要的第一个元素（术语列表）
+    hpo_data_list = _hpo_data[0]
+    # --- 修改结束 ---
 
     corpus, hpo_map = [], {}
+    # 现在我们遍历正确的列表
     for term in hpo_data_list:
         phrases = [term['name']] + term['synonyms'].split('; ')
         for phrase in phrases:
