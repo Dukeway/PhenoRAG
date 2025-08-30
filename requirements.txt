@@ -1,3 +1,5 @@
+# requirements.txt (Final version with direct PyTorch wheel URLs for Python 3.11)
+
 streamlit==1.34.1
 pandas==2.2.2
 numpy==1.26.4
@@ -6,6 +8,8 @@ sentence-transformers==2.7.0
 faiss-cpu==1.8.0
 python-dotenv==1.0.1
 
-torch
-torchvision
-torchaudio
+# Direct links to PyTorch 2.3.0 wheels for Python 3.11 on Linux (manylinux_x86_64)
+# This forces pip to install the exact correct version for the Streamlit Cloud environment.
+https://download.pytorch.org/whl/cpu/torch-2.3.0%2Bcpu-cp311-cp311-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torchvision-0.18.0%2Bcpu-cp311-cp311-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torchaudio-2.3.0%2Bcpu-cp311-cp311-linux_x86_64.whl
