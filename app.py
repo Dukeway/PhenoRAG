@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 import faiss
 
+# Load data and build KB using cached functions
+hpo_data, hpo_validator = load_hpo_data(HPO_JSON_PATH)
+knowledge_base = build_knowledge_base(hpo_data)
+
 # --- Configuration ---
 load_dotenv()
 st.set_page_config(page_title="PhenoRAG App", layout="wide")
@@ -20,7 +24,26 @@ st.set_page_config(page_title="PhenoRAG App", layout="wide")
 # This path will work correctly in Streamlit Cloud's environment
 HPO_JSON_PATH = Path("data/hp.json")
 
+# --- Main App Logic ---
+st.title("🧬 PhenoRAG: An intelligent Human Phenotype Ontology analysis tool")
+st.markdown(
+    "Enter a patient’s clinical description in any language, and this tool will automatically extract phenotypes and map them to standardized HPO terms.")
 
+with st.sidebar:
+    st.header("⚙️ 模型配置（LLM Settings）")
+    st.info("Please provide your OpenAI-compatible API credentials.")
+    api_base_url = st.text_input("API Base URL", value=os.getenv("API_BASE_URL", ""))
+    api_key = st.text_input("API Key", value=os.getenv("API_KEY", ""), type="password")
+    llm_model = st.text_input("Model Name", value=os.getenv("LLM_MODEL", ""))
+
+
+
+if not all([api_key, api_base_url, llm_model]):
+    st.warning("请在左侧侧边栏中配置有效的API信息以开始（Configure valid API）。")
+    st.stop()
+
+# Create the lightweight pipeline instance on each run
+pipeline = RAG_HPO_Pipeline(api_key, api_base_url, llm_model, knowledge_base, hpo_validator)
 # --- Step 1: Cached Data Loading (using Streamlit's cache) ---
 @st.cache_data(show_spinner="正在解析 HPO 数据文件 (Parsing HPO data)...")
 def load_hpo_data(filepath: Path):
@@ -54,7 +77,7 @@ def build_knowledge_base(_hpo_data):
     model_name = "BAAI/bge-small-en-v1.5"
     embedding_model = SentenceTransformer(model_name)  # Automatically downloads and caches
 
-    # --- 这是需要修改的地方 ---
+
     # 从传入的元组中，只获取我们需要的第一个元素（术语列表）
     hpo_data_list = _hpo_data[0]
     # --- 修改结束 ---
@@ -219,28 +242,7 @@ class RAG_HPO_Pipeline:
         }
 
 
-# --- Main App Logic ---
-st.title("🧬 PhenoRAG: An intelligent Human Phenotype Ontology analysis tool")
-st.markdown(
-    "Enter a patient’s clinical description in any language, and this tool will automatically extract phenotypes and map them to standardized HPO terms.")
 
-with st.sidebar:
-    st.header("⚙️ 模型配置（LLM Settings）")
-    st.info("Please provide your OpenAI-compatible API credentials.")
-    api_base_url = st.text_input("API Base URL", value=os.getenv("API_BASE_URL", ""))
-    api_key = st.text_input("API Key", value=os.getenv("API_KEY", ""), type="password")
-    llm_model = st.text_input("Model Name", value=os.getenv("LLM_MODEL", ""))
-
-# Load data and build KB using cached functions
-hpo_data, hpo_validator = load_hpo_data(HPO_JSON_PATH)
-knowledge_base = build_knowledge_base(hpo_data)
-
-if not all([api_key, api_base_url, llm_model]):
-    st.warning("请在左侧侧边栏中配置有效的API信息以开始（Configure valid API）。")
-    st.stop()
-
-# Create the lightweight pipeline instance on each run
-pipeline = RAG_HPO_Pipeline(api_key, api_base_url, llm_model, knowledge_base, hpo_validator)
 
 language_option = st.selectbox(
     '请选择输入文本的语言（Select input text language）:',
