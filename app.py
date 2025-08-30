@@ -46,7 +46,7 @@ def load_hpo_data(filepath: Path):
 def build_knowledge_base(_hpo_data_and_validator):
     """Builds the FAISS index and mappings. This is cached as a resource."""
     model_name = "BAAI/bge-small-en-v1.5"
-    embedding_model = SentenceTransformer(model_name)
+    embedding_model = SentenceTransformer(model_name, device='cpu')
 
     if isinstance(_hpo_data_and_validator, tuple) and len(_hpo_data_and_validator) == 2:
         hpo_data_list = _hpo_data_and_validator[0]
@@ -77,7 +77,7 @@ class RAG_HPO_Pipeline:
     def __init__(self, api_key: str, base_url: str, model: str, knowledge_base: tuple, hpo_validator: dict):
         self.llm_client = OpenAI(api_key=api_key, base_url=base_url)
         self.llm_model = model
-        self.embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+        self.embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5", device='cpu')
         self.faiss_index, self.corpus, self.hpo_map = knowledge_base
         self.hpo_validator = hpo_validator
 

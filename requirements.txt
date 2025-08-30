@@ -1,8 +1,11 @@
-streamlit
-python-dotenv
-openai
-fastembed
-faiss-cpu
-numpy
-pandas
-sentence-transformers
+streamlit==1.34.1
+pandas==2.2.2
+numpy==1.26.4
+openai==1.30.1
+sentence-transformers==2.7.0
+faiss-cpu==1.8.0
+python-dotenv==1.0.1
+torch==2.3.0
+torchvision==0.18.0
+torchaudio==2.3.0
+--extra-index-url https://download.pytorch.org/whl/cpu
