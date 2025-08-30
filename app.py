@@ -1,4 +1,4 @@
-# app.py (Final version with correct execution order for deployment)
+# app.py (Final version with correct structure and defensive unpacking)
 
 import os
 import json
@@ -16,26 +16,21 @@ import faiss
 # --- 1. Configuration and Constants ---
 load_dotenv()
 st.set_page_config(page_title="PhenoRAG App", layout="wide")
-# This path works locally and in Streamlit Cloud's environment
 HPO_JSON_PATH = Path("data/hp.json")
 
 
-# --- 2. Function Definitions (Must be defined before they are called) ---
+# --- 2. Function and Class Definitions ---
 
 @st.cache_data(show_spinner="正在解析 HPO 数据文件 (Parsing HPO data)...")
 def load_hpo_data(filepath: Path):
-    """Parses the HPO JSON file. This is cached as data."""
+    # ... (This function is correct, keep as is)
     if not filepath.exists():
         st.error(f"错误: 未找到 `hp.json` 文件 (Error: hp.json not found). 请确保它位于 `data/` 文件夹中。")
         st.stop()
-
     with open(filepath, 'r', encoding='utf-8') as f:
         data = json.load(f)
-
-    parsed_terms = []
-    hpo_validator_dict = {}
+    parsed_terms, hpo_validator_dict = [], {}
     nodes = data.get("graphs", [{}])[0].get("nodes", [])
-
     for node in nodes:
         if 'id' in node and node['id'].startswith("http://purl.obolibrary.org/obo/HP_"):
             hpo_id = node['id'].split('/')[-1].replace('_', ':')
@@ -51,28 +46,18 @@ def load_hpo_data(filepath: Path):
 def build_knowledge_base(_hpo_data_and_validator):
     """Builds the FAISS index and mappings. This is cached as a resource."""
     model_name = "BAAI/bge-small-en-v1.5"
-    embedding_model = SentenceTransformer(model_name)  # Automatically downloads and caches
+    embedding_model = SentenceTransformer(model_name)
 
-    # --- 终极防御性修复 ---
-    # 无论传入的是元组还是列表，我们都只取列表部分
-    # 我们检查传入的参数是否是一个元组并且长度为2
     if isinstance(_hpo_data_and_validator, tuple) and len(_hpo_data_and_validator) == 2:
-        # 如果是，那么我们期望的列表是第一个元素
         hpo_data_list = _hpo_data_and_validator[0]
     else:
-        # 如果不是我们期望的元组格式（可能直接就是列表），
-        # 那么我们就假设整个传入的参数就是那个列表。
-        # 这种情况不应该发生，但这是一个安全的后备方案。
         hpo_data_list = _hpo_data_and_validator
 
-    # 再加一层保险：确保 hpo_data_list 真的是一个列表
     if not isinstance(hpo_data_list, list):
         st.error("构建知识库时发生严重错误：未能获取到正确的HPO术语列表。")
         st.stop()
-    # --- 修复结束 ---
 
     corpus, hpo_map = [], {}
-    # 现在我们遍历的一定是正确的列表
     for term in hpo_data_list:
         phrases = [term['name']] + term['synonyms'].split('; ')
         for phrase in phrases:
@@ -96,11 +81,10 @@ class RAG_HPO_Pipeline:
         self.faiss_index, self.corpus, self.hpo_map = knowledge_base
         self.hpo_validator = hpo_validator
 
+    # --- All other methods for the class go here ---
     def translate_to_english(self, text: str):
-        system_prompt = (
-            "You are an expert medical translator. Your task is to translate the following text into clear, "
-            "concise, and accurate clinical English..."
-        )
+        # ... (keep your existing translate_to_english code)
+        system_prompt = "You are an expert medical translator..."
         try:
             response = self.llm_client.chat.completions.create(model=self.llm_model,
                                                                messages=[{"role": "system", "content": system_prompt},
@@ -113,9 +97,8 @@ class RAG_HPO_Pipeline:
             return None
 
     def _extract_phenotypes_from_text(self, english_text: str):
-        system_prompt = (
-            "You are a clinical genetics expert. Extract all distinct phenotypic phrases describing patient abnormalities..."
-        )
+        # ... (keep your existing _extract_phenotypes_from_text code)
+        system_prompt = "You are a clinical genetics expert..."
         try:
             response = self.llm_client.chat.completions.create(model=self.llm_model,
                                                                messages=[{"role": "system", "content": system_prompt},
@@ -134,6 +117,7 @@ class RAG_HPO_Pipeline:
             return []
 
     def _assign_hpo_terms(self, phrases: list, english_text: str):
+        # ... (keep your existing _assign_hpo_terms code)
         assignments, progress_bar = [], st.progress(0, text="正在为提取的短语分配HPO术语（Assigning HPO terms）...")
         for i, phrase in enumerate(phrases):
             progress_text = f"正在处理短语（Processing phrase） ({i + 1}/{len(phrases)}): '{phrase}'..."
@@ -169,6 +153,7 @@ class RAG_HPO_Pipeline:
         return assignments
 
     def _validate_and_format_assignments(self, assignments: list):
+        # ... (keep your existing _validate_and_format_assignments code)
         if not assignments: return []
         validated_results = []
         for term in assignments:
@@ -185,6 +170,7 @@ class RAG_HPO_Pipeline:
         return validated_results
 
     def run(self, text: str, source_language: str):
+        # ... (keep your existing run code)
         translated_text = None
         if source_language == 'English':
             st.info("检测到输入语言为英文，跳过翻译步骤（skipping translation）。")
@@ -214,7 +200,7 @@ class RAG_HPO_Pipeline:
 
 # --- 3. Main App Execution Block ---
 
-# First, load/build all heavy resources. These calls are cached by Streamlit.
+# First, load/build all heavy resources.
 hpo_data, hpo_validator = load_hpo_data(HPO_JSON_PATH)
 knowledge_base = build_knowledge_base(hpo_data)
 
@@ -229,11 +215,12 @@ with st.sidebar:
     api_key = st.text_input("API Key", value=os.getenv("API_KEY", ""), type="password")
     llm_model = st.text_input("Model Name", value=os.getenv("LLM_MODEL", ""))
 
-# Check for API config and create the lightweight pipeline instance.
+# Check for API config.
 if not all([api_key, api_base_url, llm_model]):
     st.warning("请在左侧侧边栏中配置有效的API信息以开始（Configure valid API）。")
     st.stop()
 
+# Create the lightweight pipeline instance.
 pipeline = RAG_HPO_Pipeline(api_key, api_base_url, llm_model, knowledge_base, hpo_validator)
 
 # Render the rest of the main page UI.
@@ -245,18 +232,22 @@ source_language = 'English' if language_option == 'English' else 'Non-English'
 
 sample_text_cn = "患儿，男，7岁..."  # (your full sample text here)
 sample_text_en = "A 7-year-old male..."  # (your full sample text here)
-default_text = sample_text_en if source_language == 'English' else sample_text_cn
+default_text = sample_text_en if source_language == 'English' else 'Non-English'
 user_input = st.text_area(
     "请输入患者临床描述（Enter patient clinical description）:",
     value=default_text, height=250
 )
 
+# --- This is the correct place for the main logic execution ---
 if st.button("开始分析（Start Analysis）", type="primary"):
     if user_input.strip() and pipeline:
+        # The 'pipeline.run()' call MUST be inside the button block.
         results = pipeline.run(user_input, source_language)
+
         if results:
             st.divider()
             st.subheader("📝 分析结果（Analysis Results）")
+            # ... (rest of the result display logic is correct and stays here)
             if results['translated_text']:
                 with st.expander("1. 翻译后的英文临床文本 (Translated English Text)"):
                     st.text(results['translated_text'])
@@ -273,8 +264,8 @@ if st.button("开始分析（Start Analysis）", type="primary"):
                 df_to_save = df[cols_order]
 
                 csv_data = df_to_save.to_csv(index=False, encoding='utf-8-sig')
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"hpo_analysis_{timestamp}.csv"
+                timestamp = datetime.now().strftime("%Y%m%d_%HM%S")
+                filename = f"hpo_analysis{timestamp}.csv"
                 st.download_button(
                     label="📥 Download results as CSV",
                     data=csv_data, file_name=filename, mime='text/csv'
