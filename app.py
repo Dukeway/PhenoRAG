@@ -48,14 +48,31 @@ def load_hpo_data(filepath: Path):
 
 
 @st.cache_resource(show_spinner="正在构建向量知识库 (Building vector knowledge base)...")
-def build_knowledge_base(_hpo_data):
-    """Builds the FAISS index and mappings from HPO data. This is cached as a resource."""
+def build_knowledge_base(_hpo_data_and_validator):
+    """Builds the FAISS index and mappings. This is cached as a resource."""
     model_name = "BAAI/bge-small-en-v1.5"
     embedding_model = SentenceTransformer(model_name)  # Automatically downloads and caches
 
-    hpo_data_list = _hpo_data[0]  # Unpack the tuple to get the list of terms
+    # --- 终极防御性修复 ---
+    # 无论传入的是元组还是列表，我们都只取列表部分
+    # 我们检查传入的参数是否是一个元组并且长度为2
+    if isinstance(_hpo_data_and_validator, tuple) and len(_hpo_data_and_validator) == 2:
+        # 如果是，那么我们期望的列表是第一个元素
+        hpo_data_list = _hpo_data_and_validator[0]
+    else:
+        # 如果不是我们期望的元组格式（可能直接就是列表），
+        # 那么我们就假设整个传入的参数就是那个列表。
+        # 这种情况不应该发生，但这是一个安全的后备方案。
+        hpo_data_list = _hpo_data_and_validator
+
+    # 再加一层保险：确保 hpo_data_list 真的是一个列表
+    if not isinstance(hpo_data_list, list):
+        st.error("构建知识库时发生严重错误：未能获取到正确的HPO术语列表。")
+        st.stop()
+    # --- 修复结束 ---
 
     corpus, hpo_map = [], {}
+    # 现在我们遍历的一定是正确的列表
     for term in hpo_data_list:
         phrases = [term['name']] + term['synonyms'].split('; ')
         for phrase in phrases:
