@@ -1,5 +1,3 @@
-# environment.yml (Corrected)
-
 name: phenorag-env
 channels:
   - pytorch
@@ -7,10 +5,9 @@ channels:
 dependencies:
   - python=3.11
   - pip
-  - streamlit=1.34.1
-  - pandas=2.2.2
+  - streamlit=1.34.0 
   - numpy=1.26.4
-  - openai=1.30.1  # <--- 新增/修正这一行
+  - openai=1.30.1
   - python-dotenv=1.0.1
   - pytorch::pytorch
   - pytorch::torchvision
