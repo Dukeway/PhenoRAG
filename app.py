@@ -84,7 +84,11 @@ class RAG_HPO_Pipeline:
     # --- All other methods for the class go here ---
     def translate_to_english(self, text: str):
         # ... (keep your existing translate_to_english code)
-        system_prompt = "You are an expert medical translator..."
+        system_prompt = (
+            "You are an expert medical translator. Your task is to translate the following text into clear, "
+            "concise, and accurate clinical English. Preserve all medical details, symptoms, and findings. "
+            "Do not add any interpretation, just perform a direct and professional translation."
+        )
         try:
             response = self.llm_client.chat.completions.create(model=self.llm_model,
                                                                messages=[{"role": "system", "content": system_prompt},
@@ -97,8 +101,11 @@ class RAG_HPO_Pipeline:
             return None
 
     def _extract_phenotypes_from_text(self, english_text: str):
-        # ... (keep your existing _extract_phenotypes_from_text code)
-        system_prompt = "You are a clinical genetics expert..."
+
+        system_prompt = (
+            "You are a clinical genetics expert. Extract all distinct phenotypic phrases describing patient abnormalities from the clinical text. Ignore family history and negations! Do not describe the phenotype of the patient's relatives! "
+            "Return the output as a JSON object with a single key 'phenotypes' containing a list of strings."
+        )
         try:
             response = self.llm_client.chat.completions.create(model=self.llm_model,
                                                                messages=[{"role": "system", "content": system_prompt},
@@ -132,7 +139,12 @@ class RAG_HPO_Pipeline:
                     retrieved_candidates.append(hpo_info);
                     seen_hpo_ids.add(hpo_info['hpo_id'])
             candidate_context = "\n".join([f"- {c['hpo_id']}: {c['name']}" for c in retrieved_candidates])
-            system_prompt = "You are an expert in medical ontology mapping..."
+            system_prompt = (
+                "You are an expert in medical ontology mapping. Select the single most accurate and specific "
+                "HPO term for the given clinical phrase from the provided candidate list. "
+                "Use the original text for context. Your response MUST be ONLY a single JSON object with 'hpo_id' and 'hpo_name'. "
+                "Do not add any explanations or introductory text."
+            )
             user_prompt = f"Original Clinical Text:\n---\n{english_text}\n---\n\nClinical Phrase to Map: \"{phrase}\"\n\nCandidate HPO Terms (Choose ONE):\n{candidate_context}"
             try:
                 response = self.llm_client.chat.completions.create(model=self.llm_model, messages=[
@@ -230,8 +242,15 @@ language_option = st.selectbox(
 )
 source_language = 'English' if language_option == 'English' else 'Non-English'
 
-sample_text_cn = "患儿，男，7岁..."  # (your full sample text here)
-sample_text_en = "A 7-year-old male..."  # (your full sample text here)
+sample_text_cn = ("患儿，男，7岁，因发育迟缓就诊。家长反映其语言发育明显落后，4岁才说出第一个词。"
+                  "患儿从2岁起频繁出现抽搐。体格检查发现，其头围小于同龄人正常范围，且双眼眼距过宽。"
+                  "生长曲线显示其身高持续低于第3百分位，提示身材矮小。"
+                  "此外，手指和肘部关节活动度过大。")
+sample_text_en = (
+    "A 7-year-old male presented with developmental delay. Parents reported markedly delayed speech development, with first words at age 4. "
+    "He has a history of seizures since age 2. Physical examination revealed microcephaly and ocular hypertelorism. "
+    "Growth charts show height below the 3rd percentile, indicating short stature. "
+    "Additionally, there is hyperextensibility of finger and elbow joints.")
 default_text = sample_text_en if source_language == 'English' else 'Non-English'
 user_input = st.text_area(
     "请输入患者临床描述（Enter patient clinical description）:",
