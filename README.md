@@ -8,7 +8,7 @@
 
 # PhenoRAG 
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-streamlit-app-url.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://phenorag.streamlit.app/)
 
 **Interactive, Multilingual, and Cloud-Ready: An Advanced Web Application for Real-Time Clinical Phenotype Annotation.**
 
@@ -54,9 +54,7 @@ After downloading the results as a CSV file, you may need to decide whether to d
 
 **You can access and use the live application here:**
 
-### [**https://your-streamlit-app-url.streamlit.app/**](https://your-streamlit-app-url.streamlit.app/)
-
-*(Note: Please replace the URL above with your actual Streamlit Cloud app URL)*
+### https://phenorag.streamlit.app/
 
 ---
 
@@ -75,10 +73,10 @@ After downloading the results as a CSV file, you may need to decide whether to d
 
 Using the deployed application is simple:
 
-1.  **Visit the App URL**: Click on the [live demo link](https://your-streamlit-app-url.streamlit.app/) above.
+1.  **Visit the App URL**: Click on the [live demo link](https://phenorag.streamlit.app/) above.
 2.  **Configure API in Sidebar**: The app requires an API key to function. 
     -   **If the developer has pre-configured a key**, the app will work out-of-the-box.
-    -   **If the API Key field is empty**, you will need to provide your own OpenAI-compatible API key. You can get one from services like SilicoudCloud,Together AI, or OpenAI.
+    -   **If the API Key field is empty**, you will need to provide your own OpenAI-compatible API key. You can get one from services like SiliconCloud,Together AI, or OpenAI.
 3.  **Select Language**: Choose whether your input text is "English" or "Non-English".
 4.  **Input Text**: Paste the patient's clinical description.
 5.  **Analyze**: Click the "Start Analysis" button.
@@ -133,7 +131,7 @@ Your web browser should automatically open a new tab with the application runnin
 
 ## 📜 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgements
 
