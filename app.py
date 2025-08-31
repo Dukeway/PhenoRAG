@@ -292,7 +292,7 @@ if st.button("开始分析（Start Analysis）", type="primary"):
                 filename = f"hpo_analysis{timestamp}.csv"
                 st.download_button(
                     label="📥 Download results as CSV",
-                    data=csv_data, file_name=filename, mime='text/csv'
+                    data=csv_data_bytes, file_name=filename, mime='text/csv'
                 )
 
                 st.dataframe(df_to_save, use_container_width=True, hide_index=True)
