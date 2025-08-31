@@ -222,11 +222,25 @@ st.markdown("输入任何语言的患者临床描述，本工具将使用大语�
 
 with st.sidebar:
     st.header("⚙️ 模型配置（LLM Settings）")
-    st.info("Please provide your OpenAI-compatible API credentials.")
-    api_base_url = st.text_input("API Base URL", value=os.getenv("API_BASE_URL", ""))
-    api_key = st.text_input("API Key", value=os.getenv("API_KEY", ""), type="password")
-    llm_model = st.text_input("Model Name", value=os.getenv("LLM_MODEL", ""))
+    st.info("Please provide your own OpenAI-compatible API credentials.")
 
+    # 不再使用 os.getenv 作为默认值，而是提供一个常见的默认值或留空
+    api_base_url = st.text_input(
+        "API Base URL",
+        value="https://api.siliconflow.cn/v1",  # 提供一个示例
+        help="Enter the API endpoint URL. Default is Groq."
+    )
+    api_key = st.text_input(
+        "API Key",
+        value="",  # 默认留空，强制用户输入
+        type="password",
+        help="Enter your personal API key."
+    )
+    llm_model = st.text_input(
+        "Model Name",
+        value="deepseek-ai/DeepSeek-V3",  # 提供一个示例
+        help="Enter the model name you want to use."
+    )
 # Check for API config.
 if not all([api_key, api_base_url, llm_model]):
     st.warning("请在左侧侧边栏中配置有效的API信息以开始（Configure valid API）。")
