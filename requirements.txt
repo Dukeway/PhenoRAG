@@ -1,11 +1,23 @@
-streamlit==1.34.1
+# requirements.txt (Final version, compatible with Python 3.11 on Streamlit Cloud)
+
+# Core app framework - Using a version confirmed to be available.
+streamlit==1.34.0
+
+# Data handling
 pandas==2.2.2
 numpy==1.26.4
+
+# AI and ML libraries
 openai==1.30.1
-python-dotenv==1.0.1
-faiss-cpu==1.8.0
+# Using the stable, proven combination for ML libraries
 sentence-transformers==2.2.2
+faiss-cpu==1.8.0
+
+# Dependencies for sentence-transformers==2.2.2
 transformers==4.25.1
 torch==2.1.2
 torchvision==0.16.2
 accelerate==0.25.0
+
+# Utility
+python-dotenv==1.0.1
