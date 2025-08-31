@@ -163,11 +163,10 @@ class RAG_HPO_Pipeline:
         return assignments
 
     def _validate_and_format_assignments(self, assignments: list):
-        # ... (keep your existing _validate_and_format_assignments code)
         if not assignments: return []
         validated_results = []
         for term in assignments:
-            model_hpo_id, model_hpo_name = term.get("HPO ID (model)"), term.get("HPO 名称 (model)")
+            model_hpo_id, model_hpo_name = term.get("HPO ID (model)"), term.get("HPO name (model)")
             official_name = self.hpo_validator.get(model_hpo_id)
             if official_name:
                 status = "✅ Fully correct" if official_name == model_hpo_name else "⚠️ Name mismatch"
