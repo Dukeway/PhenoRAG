@@ -224,13 +224,13 @@ with st.sidebar:
     api_base_url = st.text_input(
         "API Base URL",
         value="https://api.siliconflow.cn/v1",  # 提供一个示例
-        help="Enter the API endpoint URL. Default is Groq."
+        help="Enter the API endpoint URL. Default is SiliconCloud."
     )
     api_key = st.text_input(
         "API Key",
         value="",  # 默认留空，强制用户输入
         type="password",
-        help="Enter your personal API key."
+        help="Enter any OpenAI-compatible LLM API"
     )
     llm_model = st.text_input(
         "Model Name",
