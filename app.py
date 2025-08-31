@@ -81,9 +81,8 @@ class RAG_HPO_Pipeline:
         self.faiss_index, self.corpus, self.hpo_map = knowledge_base
         self.hpo_validator = hpo_validator
 
-    # --- All other methods for the class go here ---
+
     def translate_to_english(self, text: str):
-        # ... (keep your existing translate_to_english code)
         system_prompt = (
             "You are an expert medical translator. Your task is to translate the following text into clear, "
             "concise, and accurate clinical English. Preserve all medical details, symptoms, and findings. "
@@ -124,7 +123,6 @@ class RAG_HPO_Pipeline:
             return []
 
     def _assign_hpo_terms(self, phrases: list, english_text: str):
-        # ... (keep your existing _assign_hpo_terms code)
         assignments, progress_bar = [], st.progress(0, text="正在为提取的短语分配HPO术语（Assigning HPO terms）...")
         for i, phrase in enumerate(phrases):
             progress_text = f"正在处理短语（Processing phrase） ({i + 1}/{len(phrases)}): '{phrase}'..."
@@ -155,8 +153,8 @@ class RAG_HPO_Pipeline:
                 if json_match:
                     assignment = json.loads(json_match.group(0))
                     if assignment.get('hpo_id'):
-                        assignments.append({"原始短语 (提取)": phrase, "HPO ID (model)": assignment['hpo_id'],
-                                            "HPO 名称 (model)": assignment['hpo_name']})
+                        assignments.append({"原始短语 (phrase)": phrase, "HPO ID (model)": assignment['hpo_id'],
+                                            "HPO name (model)": assignment['hpo_name']})
                 else:
                     st.warning(f"处理短语 '{phrase}' 时，模型未返回有效的JSON（Invalid JSON）。")
             except Exception as e:
@@ -173,16 +171,15 @@ class RAG_HPO_Pipeline:
             official_name = self.hpo_validator.get(model_hpo_id)
             if official_name:
                 status = "✅ Fully correct" if official_name == model_hpo_name else "⚠️ Name mismatch"
-                term["验证状态"] = status;
-                term["官方HPO名称"] = official_name
+                term["验证（verify）"] = status;
+                term["官方HPO（official）"] = official_name
             else:
-                term["验证状态"] = "❌ Invalid ID";
-                term["官方HPO名称"] = "N/A"
+                term["验证（verify）"] = "❌ Invalid ID";
+                term["官方HPO（official）"] = "N/A"
             validated_results.append(term)
         return validated_results
 
     def run(self, text: str, source_language: str):
-        # ... (keep your existing run code)
         translated_text = None
         if source_language == 'English':
             st.info("跳过翻译步骤（skipping translation）。")
@@ -216,7 +213,7 @@ class RAG_HPO_Pipeline:
 hpo_data, hpo_validator = load_hpo_data(HPO_JSON_PATH)
 knowledge_base = build_knowledge_base(hpo_data)
 
-# Now, render the UI.
+# render the UI.
 st.title("🧬 PhenoRAG: An intelligent Human Phenotype Ontology analysis tool")
 st.markdown("输入任何语言的患者临床描述，本工具将使用大语言模型自动提取表型并将其映射到标准的人类表型本体术语。Enter a patient’s clinical description in any language...")
 
@@ -276,7 +273,7 @@ user_input = st.text_area(
     height=250
 )
 
-# --- This is the correct place for the main logic execution ---
+# ---  main logic execution ---
 if st.button("开始分析（Start Analysis）", type="primary"):
     if user_input.strip() and pipeline:
         # The 'pipeline.run()' call MUST be inside the button block.
@@ -285,7 +282,6 @@ if st.button("开始分析（Start Analysis）", type="primary"):
         if results:
             st.divider()
             st.subheader("📝 分析结果（Analysis Results）")
-            # ... (rest of the result display logic is correct and stays here)
             if results['translated_text']:
                 with st.expander("1. 翻译后的英文临床文本 (Translated English Text)"):
                     st.text(results['translated_text'])
@@ -298,7 +294,7 @@ if st.button("开始分析（Start Analysis）", type="primary"):
             st.subheader(f"{sub_prefix} 最终HPO术语分配与验证结果 (Final Assignments & Validation)")
             if results['final_assignments']:
                 df = pd.DataFrame(results['final_assignments'])
-                cols_order = ["原始短语 (提取)", "验证状态", "HPO ID (model)", "HPO 名称 (model)", "官方HPO名称"]
+                cols_order = ["原始短语 (phrase)", "验证（verify）", "HPO ID (model)", "HPO name (model)", "官方HPO（official）"]
                 df_to_save = df[cols_order]
 
                 csv_data_bytes = df_to_save.to_csv(index=False).encode('utf-8-sig')
