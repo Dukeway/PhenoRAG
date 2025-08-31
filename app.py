@@ -287,7 +287,7 @@ if st.button("开始分析（Start Analysis）", type="primary"):
                 cols_order = ["原始短语 (提取)", "验证状态", "HPO ID (model)", "HPO 名称 (model)", "官方HPO名称"]
                 df_to_save = df[cols_order]
 
-                csv_data = df_to_save.to_csv(index=False, encoding='utf-8-sig')
+                csv_data_bytes = df_to_save.to_csv(index=False).encode('utf-8-sig')
                 timestamp = datetime.now().strftime("%Y%m%d_%HM%S")
                 filename = f"hpo_analysis{timestamp}.csv"
                 st.download_button(
