@@ -185,7 +185,7 @@ class RAG_HPO_Pipeline:
         # ... (keep your existing run code)
         translated_text = None
         if source_language == 'English':
-            st.info("检测到输入语言为英文，跳过翻译步骤（skipping translation）。")
+            st.info("跳过翻译步骤（skipping translation）。")
             english_text = text
         else:
             with st.spinner("步骤 1/4: 正在将输入文本翻译成英文（Translating）..."):
@@ -218,7 +218,7 @@ knowledge_base = build_knowledge_base(hpo_data)
 
 # Now, render the UI.
 st.title("🧬 PhenoRAG: An intelligent Human Phenotype Ontology analysis tool")
-st.markdown("Enter a patient’s clinical description in any language...")
+st.markdown("输入任何语言的患者临床描述，本工具将使用大语言模型自动提取表型并将其映射到标准的人类表型本体术语。Enter a patient’s clinical description in any language...")
 
 with st.sidebar:
     st.header("⚙️ 模型配置（LLM Settings）")
@@ -238,8 +238,11 @@ pipeline = RAG_HPO_Pipeline(api_key, api_base_url, llm_model, knowledge_base, hp
 # Render the rest of the main page UI.
 language_option = st.selectbox(
     '请选择输入文本的语言（Select input text language）:',
-    ('Non-English', 'English'), index=0
+    ('Non-English', 'English'),
+    index=0 # 默认选择第一个，即“非英文”
 )
+
+# 直接判断完整的字符串，避免歧义
 source_language = 'English' if language_option == 'English' else 'Non-English'
 
 sample_text_cn = ("患儿，男，7岁，因发育迟缓就诊。家长反映其语言发育明显落后，4岁才说出第一个词。"
@@ -251,10 +254,12 @@ sample_text_en = (
     "He has a history of seizures since age 2. Physical examination revealed microcephaly and ocular hypertelorism. "
     "Growth charts show height below the 3rd percentile, indicating short stature. "
     "Additionally, there is hyperextensibility of finger and elbow joints.")
-default_text = sample_text_en if source_language == 'English' else 'Non-English'
+
+default_text = sample_text_en if language_option == 'English' else sample_text_cn
 user_input = st.text_area(
     "请输入患者临床描述（Enter patient clinical description）:",
-    value=default_text, height=250
+    value=default_text,
+    height=250
 )
 
 # --- This is the correct place for the main logic execution ---
